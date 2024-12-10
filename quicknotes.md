@@ -1,5 +1,7 @@
 ## Day 1
 
+### Morning
+
 MMU ? memory management unit  
 hard to run linux wo MMU  
 linux can run on 8mb of ram but more realistically 32mb  
@@ -79,3 +81,90 @@ linux kernel will do specific system call to the secure world to access secure p
 armv8 mandates to load a secure firmware  
 TF-A trusted firmware A: reference app of trusted firmware  
 firmware without libc  
+
+RISC-V processor also have security level 
+3 level:
+- M mode: machine mode
+- S mode: linux kernel level
+- U mode: user space applications
+
+boot sequence:  
+ROMCode -> U-boot SPL -> U-Boot -> linux kernel  
+what is FAT ? fat is a filesystem format  
+
+
+#### u-boot
+
+try to find an upstream uboot for your soc  
+configuration with kconfig  
+configs/ directory  
+some board have not be moved to kconfig  
+defconfig vs .config : devconfig list only not default   configuration defines while .config list all  
+u-boot must be configured before being compiled  
+cross compiler must be configured through CROSS_COMPILE variable  
+SPL = secondary program loader  
+SPL is first stage of the bootloader    
+will load the bootloader into the sRAM    
+SPL bootloader behavior is hardcoded in C  
+
+device tree = data structure that describe topology of hardware  
+u-boot has environment variable: key/value pairs  
+loaded and modified in RAM  
+environment can be saved in nvm  
+ext4 is the default filesystem of many linux distributions  
+uboot is loaded at the end of the RAM  
+uboot commands used to manage memory use RAM address as input  
+uboot supports many filesystem (FAT, ext2,3,4 , squashfs)  
+uboot doesnt answer ping  
+uboot environment commands can contains small script  
+if then else fi syntax exist  
+FIT = flat image tree, more used nowadays  
+contains multiple kernel image, device trees, initramfs, ...  
+ensure binaries doesn't overlap in memory
+.its file describe content of the image
+.itb after compilation by the Device Tree Compiler
+generic distro boot: file that specifies uboot how to boot  
+can be specified as an arg of uboot bootcmd  
+
+TF-A specific concept FIP: firmware image package  
+TFA does not use kconfig  
+everything comes from the make command line  
+TF-A important variable:
+- CROSS_COMPILE
+- ARCH
+- ARM_ARCH_MAJOR
+- PLAT
+- AARCH32_SP
+- DTB_FILE_NAME
+- BL33
+
+
+#### TP 1 
+
+- compile crosstool ng to be able to compile a cross compilation toolchain
+- compile a cross compilation toolchain for ARM stm32mp1
+- compile tf-a for the target
+- erase the sd card
+- partition the sd into 4 partitions: 2* same partition / FIP / bootfs
+- format the boot partition (4) to ext4 filesystem format
+- write tfa binary on partition 1,2
+- write the fip partition with the FIP which contains U-boot, BL32 monitor and device tree
+- load the sd card on the target and boot
+- you should be able to access the uboot shell with a serial link
+
+
+
+## Day 2
+
+### Morning
+
+#### Linux kernel
+
+Role is to manage hw resources: cpu, memory, io  
+provide set of portable APIs to interface with user app  
+handle concurrent access  
+system and kernel info accesible through pseudo filesystems:
+- proc, /proc, operating system related information
+- sysfs, /sys, representation of system a tree of device connected by buses
+
+
