@@ -165,7 +165,8 @@ provide set of portable APIs to interface with user app
 handle concurrent access  
 system and kernel info accesible through pseudo filesystems:
 - proc, /proc, operating system related information
-- sysfs, /sys, representation of system a tree of device connected by buses
+- sysfs, /sys, representation of system a tree of device connected by buses  
+
 we try to select a latest kernel and try to forward port the missing drivers  
 linux kernel code size is 60% drivers / 12% arch  
 device trees have an include component  
