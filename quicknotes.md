@@ -166,5 +166,104 @@ handle concurrent access
 system and kernel info accesible through pseudo filesystems:
 - proc, /proc, operating system related information
 - sysfs, /sys, representation of system a tree of device connected by buses
+we try to select a latest kernel and try to forward port the missing drivers  
+linux kernel code size is 60% drivers / 12% arch  
+device trees have an include component  
+arm32: use bootz with a zImage file  
+arm64 and RISCV: booti with Image file  
+some kernel configuration can be adjusted on command-line  
+rootwait to have the kernel wait before booting and avoid Kernel panic  
 
 
+#### TP 2
+
+- configure the linux kernel
+- compile the kernel for the target
+- upload the zImage and .dtb to the board via tftp
+- boot on the zImage
+- automate booting using tftp and `bootcmd` variable to create a script
+
+setenv bootargs ${bootargs} root=/dev/nfs ip=192.168.0.114 nfsroot=192.168.0.1:/home/fomation-07/work/nfsroot,nfsvers=3,tcp rw
+
+#### Afternoon
+
+##### filesystems
+
+`mount` without argument list all mount points on the system  
+/ is the root filesystem
+need to mount a storage device to access its filesystem
+need to umount before unplugging  
+root fs can be mount from partition of external memory  
+its a config of the kernel behavior  
+partition:
+- usb or hard disk: /dev/sdXY where x is device number and y partition number
+- sd card: /dev/mmcblkXpY where x is device number and y partition number
+- flash storage: mtdblockX where x is partition number
+we can also mount the root filesystem from a network filesystem (NFS)
+we need to install an nfs server (`sudo apt install nfs-kernel-server`)  
+and add the directory we want to share to the `/etc/exports` file  
+we need to compile the kernel with the according commands to have NFS support  
+we can also boot from filesystem in memory: `initramfs`
+this can be used as an intermediate step before switching to real fs or to have a very fast boot  
+initramfs is a CPIO archive: `cpio -H newc -o > initramfs.cpio && gzip initramfs.cpio`
+we can also do it at the compilation time with setting `CONFIG_INITRAMFS_SOURCE` to our root fs  
+important directory of root fs:
+- bin: basic programs
+- boot: kernel image, config and initramfs
+- dev: device files
+- etc: system wide config
+- home: user directory
+- lib: basic libs
+- media: mount point for removable medias
+- mnt: mount point for temporarily mounted filesystem
+- proc: mount point for the proc virtual filesystem
+- root: home directory of root user
+- run: run time variable data
+- sbin: basic system programs
+- sys: mount point of the sysfs virtual fs
+- tmp: temporary files
+- usr: user specific bin, sbin, lib
+- var: variable data files for system services. temporary file, logging
+
+##### pseudo filesystems
+
+proc: kernel expose statistics about running processes in the system  
+ps and top use `/proc` fs to print data  
+command to mount proc: `mount -t proc nodev /proc`  
+proc contains one directory for each running process  
+contains details about the files opened by the process, CPU and memory usage ...  
+`/proc/sys` contains file that can be written to adjust kernel parameters
+ex: can be used to drop the cache and see real memory usage of an application
+
+##### minimal filesystem
+
+minimal requirements:  
+an init application: first user space application started after mount of the root fs  
+init is responsible for starting all other user space apps and services  
+is the original parent process  
+shell is not mandatory but will always be present  
+systemd can be used as replacement of the init application  
+on embedded device, it can increase a lot the boot time compared to a simple init app  
+it also take more processing and storage so it wont fit on every target  
+kernel doesnt need specific module to read an initramfs  
+
+#### BusyBox
+
+is a rewrite of many useful unix command line utilities  
+compiled into a single executable  
+symbolic links between each command and `/bin/busybox`  
+ARG0 is used to call the corresponding command  
+busybox is used in debian and ubuntu to implement some commands  
+busybox contains implementation of an init program  
+busybox can tell how much an option will cost in memory  
+
+
+#### TP 3
+
+- compile busybox
+- load busybox fs with nfs on the board
+- create inittab and init.d/rCS script to init
+- cross compile binary for target
+- try to run on target -> wont work -> add static missing libraries -> run ex
+- measure size of busybox binary before: 337.2K
+- after compile without static: 218.1K
