@@ -198,12 +198,13 @@ its a config of the kernel behavior
 partition:
 - usb or hard disk: /dev/sdXY where x is device number and y partition number
 - sd card: /dev/mmcblkXpY where x is device number and y partition number
-- flash storage: mtdblockX where x is partition number
-we can also mount the root filesystem from a network filesystem (NFS)
-we need to install an nfs server (`sudo apt install nfs-kernel-server`)  
+- flash storage: mtdblockX where x is partition number  
+
+we can also mount the root filesystem from a network filesystem (NFS)  
+we need to install an nfs server (`sudo apt install nfs-kernel-server`)   
 and add the directory we want to share to the `/etc/exports` file  
 we need to compile the kernel with the according commands to have NFS support  
-we can also boot from filesystem in memory: `initramfs`
+we can also boot from filesystem in memory: `initramfs`  
 this can be used as an intermediate step before switching to real fs or to have a very fast boot  
 initramfs is a CPIO archive: `cpio -H newc -o > initramfs.cpio && gzip initramfs.cpio`
 we can also do it at the compilation time with setting `CONFIG_INITRAMFS_SOURCE` to our root fs  
